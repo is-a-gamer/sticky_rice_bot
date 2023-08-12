@@ -121,6 +121,7 @@ celerybeat.pid
 
 # Environments
 .env
+.channel_bind.json
 .venv
 env/
 venv/
