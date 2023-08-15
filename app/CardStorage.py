@@ -225,6 +225,58 @@ def HelpCard() -> Card:
     return card
 
 
+def taItemCard(items) -> Card:
+    return_card = []
+    card = Card()
+    if items:
+        for item in items:
+            card.append(
+                Module.Section(
+                    Element.Text(f'** ({items.index(item) + 1}) {item["name"]}, 跳蚤价格: {item["lastLowPrice"]}**',
+                                 type=Types.Text.KMD),
+                    accessory=Element.Image(
+                        src=item["iconLink"] if item["iconLink"] != "" else NO_COVER_URL,
+                        size=Types.Size.SM,
+                    ),
+                ),
+            )
+            card.append(Module.Section(
+                accessory=Element.Button(f'查询{item["name"]}', f'tapick:{item["id"]}:-1', theme=Types.Theme.SUCCESS),
+            ))
+            card.append(Module.Divider())
+        return_card.append(card)
+    return (card for card in return_card)
+
+
+def taItemPriceCard(items) -> Card:
+    return_card = []
+    card = Card()
+    if items:
+        for item in items:
+            vendors_name = ["**商人**"]
+            prices = ["**价格**"]
+            currencys = ["**货币**"]
+            card.append(
+                Module.Section(
+                    Element.Text(f'** ({items.index(item) + 1}) {item["name"]} 出售价格', type=Types.Text.KMD),
+                    accessory=Element.Image(
+                        src=item["iconLink"] if item["iconLink"] != "" else NO_COVER_URL,
+                        size=Types.Size.SM,
+                    ),
+                ),
+            )
+            for sell_data in item["sellFor"]:
+                vendors_name.append(sell_data["vendor"]["name"])
+                prices.append(str(sell_data["price"]))
+                currencys.append(sell_data["currency"])
+            card.append(Module.Section(
+                Struct.Paragraph(3, Element.Text("\n".join(vendors_name)),Element.Text("\n".join(prices)),Element.Text("\n".join(currencys)))
+            ))
+        card.append(Module.Divider())
+        return_card.append(card)
+    return (card for card in return_card)
+
+
 def searchCard(music_dict: dict) -> Card:
     return_card = []
     music_list: list[Music] = []
@@ -272,6 +324,7 @@ def pickCard(music: Music) -> Card:
                 f"**{music.name}  -  {music.author}**\n{f'专辑：{music.album}' if music.album else ''}\n来源：{source_url}",
                 type=Types.Text.KMD
             ),
+            Element.Button('点歌', f'pick:{str(music_list.index(music))}:-1', theme=Types.Theme.SUCCESS),
             accessory=Element.Image(
                 src=music.cover_url if music.cover_url != "" else NO_COVER_URL,
                 size=Types.Size.SM
@@ -313,32 +366,6 @@ def topCard(music_list: list[Music]) -> Card:
             break
 
     return card
-
-
-def taItemCard(items) -> Card:
-    return_card = []
-    card = Card()
-    if items:
-        for item in items:
-            card.append(
-                Module.Section(
-                    Element.Text(f'** ({items.index(item) + 1}) {item["name"]}, 商人售出价格: {item["basePrice"]}**', type=Types.Text.KMD),
-                    Element.Button('查询', f'pick:{str(items.index(item))}:-1', theme=Types.Theme.SUCCESS)
-                )
-            )
-            card.append(Module.Context(
-                Element.Text(f' {item["name"]}')
-            ))
-            card.append(Module.Divider())
-        # card.append(
-        #     Module.Context(
-        #         # Element.Text(f':mag: 来自*{ASSETS[key]["text"]}* ', Types.Text.KMD),
-        #         # Element.Image(ASSETS[key]["icon"]),
-        #         # Element.Text('\n输入 /select {编号} 或 /选 {编号} 即可加入歌单(一分钟内操作有效)')
-        #     )
-        # )
-        return_card.append(card)
-    return (card for card in return_card)
 
 
 def channel_card(user_name, channel_name, cu_time, command=""):

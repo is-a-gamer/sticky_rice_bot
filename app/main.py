@@ -24,7 +24,7 @@ from app.utils.message_utils import update_cardmessage_by_bot
 from app.task.interval_tasks import update_played_time_and_change_music, clear_expired_candidates_cache, \
     keep_bproxy_alive, update_kanban_info, update_playing_game_status, keep_bot_market_heart_beat
 
-from app.tarkov.search import fetch_item_data_by_name
+from app.tarkov.search import fetch_item_data_by_name, fetch_item_price_by_id,fetch_item_price_by_name
 
 import app.CardStorage as CS
 
@@ -71,7 +71,7 @@ async def help(msg: Message):
 @log(command="tasearch")
 async def tarkov_item_search(msg: Message, item_name):
     if not item_name:
-        raise Exception("输入格式有误。\n正确格式为: /tasearch {item_name} 或 /塔搜索 {item_name}")
+        raise Exception("输入格式有误。\n正确格式为: /tasell {item_name} 或 /塔出售 {item_name}")
     else:
         d = await fetch_item_data_by_name(name=item_name)
         if len(d["data"]["items"]) == 0:
@@ -79,6 +79,27 @@ async def tarkov_item_search(msg: Message, item_name):
         taItemCard = CardMessage(*CS.taItemCard(d["data"]["items"]))
         await msg.channel.send(taItemCard)
 
+@bot.command(name="tasell", aliases=["塔出售"])
+@log(command="tasell")
+async def tarkov_item_sell(msg: Message, item_name):
+    if not item_name:
+        raise Exception("输入格式有误。\n正确格式为: /tasell {item_name} 或 /塔出售 {item_name}")
+    else:
+        d = await fetch_item_data_by_name(name=item_name)
+        if len(d["data"]["items"]) == 0:
+            raise Exception(f"未找到物品: {item_name}")
+        taItemCard = CardMessage(*CS.taItemCard(d["data"]["items"]))
+        await msg.channel.send(taItemCard)
+
+@bot.command(name="taprice", aliases=["tapick", "塔价格"])
+@log(command="taprice")
+async def ta_price(msg: Message, item_name: str = ""):
+    if not item_name:
+        raise Exception("输入格式有误。\n正确格式为: /taprice {编号} 或 /塔价格 {编号}")
+    else:
+        data = await fetch_item_price_by_name(item_name)
+        c = CardMessage(*CS.taItemPriceCard(data["data"]["items"]))
+        await msg.channel.send(c)
 
 ################################
 @bot.command(name="debug")
@@ -294,115 +315,6 @@ async def search_music(msg: Message, *args):
         else:
             await msg.reply(f"没有任何与关键词: {keyword} 匹配的信息, 试试搜索其他关键字吧")
 
-
-@bot.command(name="nsearch", aliases=["wyy", "wyysearch", "搜索网易云", "搜网易"])
-@log(command="nsearch")
-@ban
-@warn
-async def search_netease(msg: Message, *args):
-    keyword = " ".join(args)
-    if not keyword:
-        raise Exception("输入格式有误。\n正确格式为: /search {keyword} 或 /搜 {keyword}")
-    else:
-        candidates = await search_music_by_keyword(music_name=keyword)
-        if candidates:
-            # put candidates into global cache first
-            author_id = msg.author.id
-            expire = datetime.datetime.now() + datetime.timedelta(minutes=1)
-            candidates_body = {
-                "candidates": candidates,
-                "expire": expire,
-            }
-            settings.candidates_map.pop(author_id, None)
-            settings.candidates_map[author_id] = candidates_body
-
-            select_menu_msg = CardMessage(*CS.searchCard({"netease": candidates}))
-            await msg.reply(select_menu_msg)
-
-        else:
-            await msg.reply(f"没有任何与关键词: {keyword} 匹配的信息, 试试搜索其他关键字吧")
-
-
-@bot.command(name='osearch', aliases=['osu', 'osusearch', 'searchosu', '搜索osu', '搜osu'])
-@log(command="osearch")
-@ban
-@warn
-async def search_osu(msg: Message, *args):
-    keyword = ' '.join(args)
-    if not keyword:
-        raise Exception("格式输入有误。\n正确格式为: /osearch {keyword} 或 /搜osu {keyword}")
-    else:
-        candidates = await osearch_music_by_keyword(music_name=keyword)
-        if candidates:
-            author_id = msg.author.id
-            expire = datetime.datetime.now() + datetime.timedelta(minutes=1)
-            candidates_body = {
-                "candidates": candidates,
-                "expire": expire
-            }
-            settings.candidates_map.pop(author_id, None)
-            settings.candidates_map[author_id] = candidates_body
-
-            select_menu_msg = CardMessage(*CS.searchCard({"osu": candidates}))
-            await msg.reply(select_menu_msg)
-
-        else:
-            await msg.reply(f"没有任何与关键词: {keyword} 匹配的信息, 试试搜索其他关键字吧")
-
-
-@bot.command(name='msearch', aliases=['migu', 'migusearch', 'searchmigu', '搜索咪咕', '搜咪咕', '咪咕音乐'])
-@log(command="msearch")
-@ban
-@warn
-async def search_migu(msg: Message, *args):
-    keyword = ' '.join(args)
-    if not keyword:
-        raise Exception("格式输入有误。\n正确格式为: /msearch {keyword} 或 /搜咪咕 {keyword}")
-    else:
-        candidates = await msearch_music_by_keyword(music_name=keyword)
-        if candidates:
-            author_id = msg.author.id
-            expire = datetime.datetime.now() + datetime.timedelta(minutes=1)
-            candidates_body = {
-                "candidates": candidates,
-                "expire": expire
-            }
-            settings.candidates_map.pop(author_id, None)
-            settings.candidates_map[author_id] = candidates_body
-
-            select_menu_msg = CardMessage(*CS.searchCard({"migu": candidates}))
-            await msg.reply(select_menu_msg)
-        else:
-            await msg.reply(f"没有任何与关键词: {keyword} 匹配的信息, 试试搜索其他关键字吧")
-
-
-@bot.command(name='qsearch', aliases=['qq', 'qqsearch', 'searchqq', '搜索QQ', '搜QQ', 'QQ音乐', '搜索QQ音乐'])
-@log(command="qsearch")
-@ban
-@warn
-async def search_qq(msg: Message, *args):
-    keyword = ' '.join(args)
-    if not keyword:
-        raise Exception("格式输入有误。\n正确格式为: /msearch {keyword} 或 /搜咪咕 {keyword}")
-    else:
-        candidates = await qsearch_music_by_keyword(bot, keyword)
-        if candidates:
-            author_id = msg.author.id
-            expire = datetime.datetime.now() + datetime.timedelta(minutes=1)
-            candidates_body = {
-                "candidates": candidates,
-                "expire": expire
-            }
-            settings.candidates_map.pop(author_id, None)
-            settings.candidates_map[author_id] = candidates_body
-
-            select_menu_msg = CardMessage(*CS.searchCard({"qqmusic": candidates}))
-            await msg.channel.send(select_menu_msg)
-
-        else:
-            await msg.channel.send(f"没有任何与关键词: {keyword} 匹配的信息, 试试搜索其他关键字吧")
-
-
 @bot.command(name="select", aliases=["pick", "选择", "选"])
 @log(command="select")
 @ban
@@ -427,6 +339,10 @@ async def select_candidate(msg: Message, candidate_num: str = ""):
                 settings.candidates_map.pop(author_id, None)
                 settings.playqueue.append(selected_music)
                 await msg.channel.send(f"已将 {selected_music.name}-{selected_music.author} 添加到播放列表")
+
+
+
+
 
 
 @bot.command(name="list", aliases=["ls", "列表", "播放列表", "队列"])
@@ -748,7 +664,6 @@ async def msg_btn_click(b: Bot, event: Event):
             selected_music = candidates[pick_number]
             settings.candidates_map.pop(user_id, None)
             settings.playqueue.append(selected_music)
-
             await update_cardmessage(message, CardMessage(CS.pickCard(selected_music)))
 
 
@@ -763,6 +678,13 @@ async def msg_btn_click(b: Bot, event: Event):
             settings.playqueue.insert(1, to_top_music)
             new_play_list = list(settings.playqueue)
             await update_cardmessage(message, CardMessage(CS.topCard(new_play_list[1:])))
+
+    elif action == 'tapick':
+        pick_id = args[0]
+        data = await fetch_item_price_by_id(pick_id)
+        c = CardMessage(*CS.taItemPriceCard(data["data"]["items"]))
+        await message.channel.send(c)
+
 
     '''
     elif action == 'cut':

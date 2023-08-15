@@ -20,21 +20,33 @@ class GQueryBuilder(object):
     def build(self):
         search_args = []
         for key in self.args.keys():
-            if key == "name":
+            if key == "name" or key == "ids":
                 search_args.append(f'{key}: "{self.args[key]}"')
                 continue
             search_args.append(f'{key}: {self.args[key]}')
 
         search_args_str = ", ".join(search_args)
         return_field_str = "\n    ".join(self.return_field)
-        return json.dumps({"query":f'''
+        return json.dumps({"query": f'''
 {{
   {self.search_type}({search_args_str}) {{
     {return_field_str}
   }}
 }}
-'''},indent=4)
+'''}, indent=4)
 
 
-def base_item_query(args):
-    return GQueryBuilder(search_type="items", args=args, return_field=["id", "name", "shortName", "link", "basePrice"]).build()
+def item_base_query(args):
+    return GQueryBuilder(search_type="items", args=args,
+                         return_field=["id", "name", "shortName", "link", "basePrice", "iconLink","lastLowPrice"]).build()
+
+
+def item_price_query(args):
+    return GQueryBuilder(search_type="items", args=args, return_field=["name",
+                                                                       "basePrice",
+                                                                       "lastLowPrice",
+                                                                       "types",
+                                                                       "updated",
+                                                                       "iconLink",
+                                                                       "lastLowPrice",
+                                                                       "sellFor{price,currency,vendor{name,normalizedName}}"]).build()
