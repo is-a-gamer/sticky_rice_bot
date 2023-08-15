@@ -270,11 +270,65 @@ def taItemPriceCard(items) -> Card:
                 prices.append(str(sell_data["price"]))
                 currencys.append(sell_data["currency"])
             card.append(Module.Section(
-                Struct.Paragraph(3, Element.Text("\n".join(vendors_name)),Element.Text("\n".join(prices)),Element.Text("\n".join(currencys)))
+                Struct.Paragraph(3, Element.Text("\n".join(vendors_name)), Element.Text("\n".join(prices)),
+                                 Element.Text("\n".join(currencys)))
             ))
         card.append(Module.Divider())
         return_card.append(card)
     return (card for card in return_card)
+
+
+def hideoutStationsCard(hideoutStations, hei=True) -> Card:
+    return_card = []
+    card = Card()
+    item_req = {}
+    for ca in hideoutStations:
+        if hei:
+            if ca["name"] == "仓库":
+                continue
+        for l in ca["levels"]:
+            for i in l["itemRequirements"]:
+                if i["item"]["name"] in item_req:
+                    item_req[i["item"]["name"]] += i["count"]
+                else:
+                    item_req[i["item"]["name"]] = i["count"]
+        item_names = ["**物品名称**"]
+        item_counts = ["**所需数量**"]
+        for iname in item_req.keys():
+            item_names.append(iname)
+            item_counts.append(str(item_req[iname]))
+        card.append(Module.Section(
+            Struct.Paragraph(2, Element.Text("\n".join(item_names)), Element.Text("\n".join(item_counts)))
+        ))
+        card.append(Module.Divider())
+        return_card.append(card)
+    return (card for card in return_card)
+
+# def hideoutStationsCard(hideoutStations, hei=True) -> Card:
+#     return_card = []
+#     card = Card()
+#     item_req = {}
+#     for ca in hideoutStations:
+#         if hei:
+#             if ca["name"] == "仓库":
+#                 continue
+#         for l in ca["levels"]:
+#             for i in l["itemRequirements"]:
+#                 if i["item"]["name"] in item_req:
+#                     item_req[i["item"]["name"]] += i["count"]
+#                 else:
+#                     item_req[i["item"]["name"]] = i["count"]
+#         item_names = ["**物品名称**"]
+#         item_counts = ["**所需数量**"]
+#         for iname in item_req.keys():
+#             item_names.append(iname)
+#             item_counts.append(str(item_req[iname]))
+#         card.append(Module.Section(
+#             Struct.Paragraph(2, Element.Text("\n".join(item_names)), Element.Text("\n".join(item_counts)))
+#         ))
+#         card.append(Module.Divider())
+#         return_card.append(card)
+#     return (card for card in return_card)
 
 
 def searchCard(music_dict: dict) -> Card:

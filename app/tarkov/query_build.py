@@ -38,7 +38,8 @@ class GQueryBuilder(object):
 
 def item_base_query(args):
     return GQueryBuilder(search_type="items", args=args,
-                         return_field=["id", "name", "shortName", "link", "basePrice", "iconLink","lastLowPrice"]).build()
+                         return_field=["id", "name", "shortName", "link", "basePrice", "iconLink",
+                                       "lastLowPrice"]).build()
 
 
 def item_price_query(args):
@@ -50,3 +51,8 @@ def item_price_query(args):
                                                                        "iconLink",
                                                                        "lastLowPrice",
                                                                        "sellFor{price,currency,vendor{name,normalizedName}}"]).build()
+
+
+def hideout_stations_query(args):
+    return GQueryBuilder(search_type="hideoutStations", args=args, return_field=["name",
+                                                                                 "levels{level,itemRequirements{item{name}count}}"]).build()
