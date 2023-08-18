@@ -39,7 +39,7 @@ class GQueryBuilder(object):
 def item_base_query(args):
     return GQueryBuilder(search_type="items", args=args,
                          return_field=["id", "name", "shortName", "link", "basePrice", "iconLink",
-                                       "lastLowPrice"]).build()
+                                       "lastLowPrice","avg24hPrice"]).build()
 
 
 def item_price_query(args):
