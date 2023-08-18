@@ -1,17 +1,16 @@
 import datetime
-
-from khl.card import Card
-from khl.card.module import Module
-from khl.card.interface import Types, _Module
-from khl.card.element import Element
-from khl.card.struct import Struct
-from khl.card.color import Color
-
-###################### music
-
 from typing import Tuple
 
+from khl.card import Card
+from khl.card.color import Color
+from khl.card.element import Element
+from khl.card.interface import Types
+from khl.card.module import Module
+from khl.card.struct import Struct
+
 from app.music.music import Music
+
+###################### music
 
 __MUSIC_LIST_TILE_COLOR = "#9b59b6"
 __MUSIC_LIST_PLAYING_MUSIC_COLOR = "#a29bfe"
@@ -232,7 +231,7 @@ def taItemCard(items) -> Card:
         for item in items:
             card.append(
                 Module.Section(
-                    Element.Text(f'** ({items.index(item) + 1}) {item["name"]}, 跳蚤价格: {item["lastLowPrice"]}**',
+                    Element.Text(f'** ({items.index(item) + 1}) {item["name"]}, 跳蚤24小时平均价格: {item["avg24hPrice"]}**',
                                  type=Types.Text.KMD),
                     accessory=Element.Image(
                         src=item["iconLink"] if item["iconLink"] != "" else NO_COVER_URL,
@@ -270,9 +269,7 @@ def taItemPriceCard(items) -> Card:
                 prices.append(str(sell_data["price"]))
                 currencys.append(sell_data["currency"])
             card.append(Module.Section(
-                Struct.Paragraph(3, Element.Text("\n".join(vendors_name)), Element.Text("\n".join(prices)),
-                                 Element.Text("\n".join(currencys)))
-            ))
+                Struct.Paragraph(3, Element.Text("\n".join(vendors_name)), Element.Text("\n".join(prices)),Element.Text("\n".join(currencys)))))
         card.append(Module.Divider())
         return_card.append(card)
     return (card for card in return_card)
@@ -303,6 +300,7 @@ def hideoutStationsCard(hideoutStations, hei=True) -> Card:
         card.append(Module.Divider())
         return_card.append(card)
     return (card for card in return_card)
+
 
 # def hideoutStationsCard(hideoutStations, hei=True) -> Card:
 #     return_card = []

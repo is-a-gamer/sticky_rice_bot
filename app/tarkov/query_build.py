@@ -49,7 +49,7 @@ def item_price_query(args):
                                                                        "types",
                                                                        "updated",
                                                                        "iconLink",
-                                                                       "lastLowPrice",
+                                                                       "avg24hPrice",
                                                                        "sellFor{price,currency,vendor{name,normalizedName}}"]).build()
 
 

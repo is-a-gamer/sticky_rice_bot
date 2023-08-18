@@ -81,19 +81,6 @@ async def tarkov_item_search(msg: Message, item_name):
         await msg.channel.send(taItemCard)
 
 
-@bot.command(name="tasell", aliases=["塔出售"])
-@log(command="tasell")
-async def tarkov_item_sell(msg: Message, item_name):
-    if not item_name:
-        raise Exception("输入格式有误。\n正确格式为: /tasell {item_name} 或 /塔出售 {item_name}")
-    else:
-        d = await fetch_item_data_by_name(name=item_name)
-        if len(d["data"]["items"]) == 0:
-            raise Exception(f"未找到物品: {item_name}")
-        taItemCard = CardMessage(*CS.taItemCard(d["data"]["items"]))
-        await msg.channel.send(taItemCard)
-
-
 @bot.command(name="taprice", aliases=["tapick", "塔价格"])
 @log(command="taprice")
 async def ta_price(msg: Message, item_name: str = ""):
@@ -105,8 +92,8 @@ async def ta_price(msg: Message, item_name: str = ""):
         await msg.channel.send(c)
 
 
-@bot.command(name="hideout", aliases=["藏身处查询"])
-@log(command="hideout")
+# @bot.command(name="hideout", aliases=["藏身处查询"])
+# @log(command="hideout")
 async def ta_price(msg: Message, item_name: str = ""):
     if not item_name:
         raise Exception("输入格式有误。\n正确格式为: /hideout {编号} 或 /藏身处 {编号}")
@@ -118,16 +105,15 @@ async def ta_price(msg: Message, item_name: str = ""):
 
 @bot.command(name="hideout_all", aliases=["藏身处满级"])
 @log(command="hideout_all")
-async def ta_price(msg: Message, version: str = "", test_arg: str = ""):
+async def ta_price(msg: Message, version: str = ""):
     if not version:
-        await msg.channel.send("当前未输入版本，默认为黑边(仓库满级不做计算) 如果需要修改 /藏身处满级 白边")
+        raise Exception("当前未输入版本，默认为黑边(仓库满级不做计算) 如果需要修改 /藏身处满级 白边")
     data = await fetch_hideout_all()
     # c = CardMessage(*CS.hideoutStationsCard(data["data"]["hideoutStations"], version == "黑边" or version == ""))
     item_req = {}
     for ca in data["data"]["hideoutStations"]:
-        if version == "黑边" or version == "":
-            if ca["name"] == "仓库":
-                continue
+        if (version == "黑边" or version == "") and ca["name"] == "仓库":
+            continue
         for l in ca["levels"]:
             for i in l["itemRequirements"]:
                 if i["item"]["name"] in item_req:
@@ -148,8 +134,10 @@ async def ta_price(msg: Message, version: str = "", test_arg: str = ""):
 async def ta_price(msg: Message, item_name: str = "", number: str = ""):
     if not item_name:
         await msg.channel.send("当前未输入物品名称，正确格式 /藏身处找到 {name} {number}")
+        return
     if not number:
         await msg.channel.send("当前未输入数量，正确格式 /藏身处找到 {name} {number}")
+        return
     with open("hideout_find.json", "r") as f:
         d = json.load(f)
         if str(msg.author.id) in d:
