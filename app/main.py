@@ -41,21 +41,21 @@ channel_bind.init()
 gate = bot.client.gate
 
 
-@bot.command(name="ping")
 @log(command="ping")
+@bot.command(name="ping")
 async def ping(msg: Message):
     await msg.channel.send("コスモブルーフラッシュ！")
     logger.success(f"log_id: {msg.ctx.log_id} recieved")
 
 
-@bot.command(name="test_card")
 @log(command="test_card")
+@bot.command(name="test_card")
 async def test_card(msg: Message):
     await msg.channel.send(CardMessage(CS.channel_card("user_name", "channel_name", "cu_time", "")))
 
 
-@bot.command(name="version")
 @log(command="version")
+@bot.command(name="version")
 async def version(msg: Message):
     await msg.channel.send(f"Version number: {__version__}")
 
@@ -68,11 +68,11 @@ async def help(msg: Message):
 
 ################################
 
-@bot.command(name="tasearch", aliases=["塔搜索"])
 @log(command="tasearch")
+@bot.command(name="tasearch", aliases=["塔搜索"])
 async def tarkov_item_search(msg: Message, item_name):
     if not item_name:
-        raise Exception("输入格式有误。\n正确格式为: /tasell {item_name} 或 /塔出售 {item_name}")
+        msg.channel.send("输入格式有误。\n正确格式为: /tasell {item_name} 或 /塔出售 {item_name}")
     else:
         d = await fetch_item_data_by_name(name=item_name)
         if len(d["data"]["items"]) == 0:
@@ -81,8 +81,8 @@ async def tarkov_item_search(msg: Message, item_name):
         await msg.channel.send(taItemCard)
 
 
-@bot.command(name="taprice", aliases=["tapick", "塔价格"])
 @log(command="taprice")
+@bot.command(name="taprice", aliases=["tapick", "塔价格"])
 async def ta_price(msg: Message, item_name: str = ""):
     if not item_name:
         raise Exception("输入格式有误。\n正确格式为: /taprice {编号} 或 /塔价格 {编号}")
@@ -91,23 +91,21 @@ async def ta_price(msg: Message, item_name: str = ""):
         c = CardMessage(*CS.taItemPriceCard(data["data"]["items"]))
         await msg.channel.send(c)
 
-
-# @bot.command(name="hideout", aliases=["藏身处查询"])
-# @log(command="hideout")
+@log(command="taprice")
+@bot.command(name="tabyfor", aliases=["塔购买"])
 async def ta_price(msg: Message, item_name: str = ""):
     if not item_name:
-        raise Exception("输入格式有误。\n正确格式为: /hideout {编号} 或 /藏身处 {编号}")
+        raise Exception("输入格式有误。\n正确格式为: /taprice {编号} 或 /塔价格 {编号}")
     else:
         data = await fetch_item_price_by_name(item_name)
         c = CardMessage(*CS.taItemPriceCard(data["data"]["items"]))
         await msg.channel.send(c)
 
-
-@bot.command(name="hideout_all", aliases=["藏身处满级"])
 @log(command="hideout_all")
+@bot.command(name="hideout_all", aliases=["藏身处满级"])
 async def ta_price(msg: Message, version: str = ""):
     if not version:
-        raise Exception("当前未输入版本，默认为黑边(仓库满级不做计算) 如果需要修改 /藏身处满级 白边")
+        await msg.channel.send(("当前未输入版本，默认为黑边(仓库满级不做计算) 如果需要修改 /藏身处满级 白边"))
     data = await fetch_hideout_all()
     # c = CardMessage(*CS.hideoutStationsCard(data["data"]["hideoutStations"], version == "黑边" or version == ""))
     item_req = {}
@@ -129,8 +127,8 @@ async def ta_price(msg: Message, version: str = ""):
     await msg.channel.send(json.dumps(item_req, indent=2, ensure_ascii=False))
 
 
-@bot.command(name="hideout_find", aliases=["藏身处找到"])
 @log(command="hideout_find")
+@bot.command(name="hideout_find", aliases=["藏身处找到"])
 async def ta_price(msg: Message, item_name: str = "", number: str = ""):
     if not item_name:
         await msg.channel.send("当前未输入物品名称，正确格式 /藏身处找到 {name} {number}")
@@ -153,8 +151,8 @@ async def ta_price(msg: Message, item_name: str = "", number: str = ""):
 
 
 ################################
-@bot.command(name="debug")
 @log(command="debug")
+@bot.command(name="debug")
 async def debug(msg: Message):
     if msg.author.id in settings.admin_users:
         settings.debug = not settings.debug
@@ -166,10 +164,8 @@ async def debug(msg: Message):
         await msg.channel.send("permission denied")
 
 
-@bot.command(name="channel", aliases=["频道", "语音频道"])
 @log(command="channel")
-@ban
-@warn
+@bot.command(name="channel", aliases=["频道", "语音频道"])
 async def update_voice_channel(msg: Message, channel_id: str = ""):
     if not channel_id:
         raise Exception("输入格式有误。\n正确格式为: /channel {channel_id} 或 /频道 {channel_id}")
@@ -178,8 +174,8 @@ async def update_voice_channel(msg: Message, channel_id: str = ""):
         await msg.channel.send(f"语音频道更新为: {settings.channel}")
 
 
-@bot.command(name="comehere", aliases=["来", "来我频道", "come"])
 @log(command="comehere")
+@bot.command(name="comehere", aliases=["来", "来我频道", "come"])
 @ban
 @warn
 async def come_to_my_voice_channel(msg: Message):
@@ -196,8 +192,8 @@ async def come_to_my_voice_channel(msg: Message):
     await bot.command.get("channel").handler(msg, author_voice_channel_id)
 
 
-@bot.command(name="play", aliases=["点歌"])
 @log(command="play")
+@bot.command(name="play", aliases=["点歌"])
 @ban
 @warn
 async def play_music(msg: Message, *args):
@@ -213,8 +209,8 @@ async def play_music(msg: Message, *args):
             await msg.channel.send(f"没有搜索到歌曲: {music_name} 哦，试试搜索其他歌曲吧")
 
 
-@bot.command(name='playlist', aliases=["歌单", "导入歌单"])
 @log(command="playlist")
+@bot.command(name='playlist', aliases=["歌单", "导入歌单"])
 @ban
 @warn
 async def import_music_by_playlist(msg: Message, playlist_url: str = ""):
@@ -239,8 +235,8 @@ async def import_music_by_playlist(msg: Message, playlist_url: str = ""):
     await msg.channel.send("导入成功, 输入 /list 查看播放列表")
 
 
-@bot.command(name='album', aliases=['专辑', '导入专辑'])
 @log(command='album')
+@bot.command(name='album', aliases=['专辑', '导入专辑'])
 @ban
 @warn
 async def import_music_by_album(msg: Message, album_url: str = ''):
@@ -265,8 +261,8 @@ async def import_music_by_album(msg: Message, album_url: str = ''):
     await msg.channel.send('导入成功，输入 /list 查看播放列表')
 
 
-@bot.command(name='radio', aliases=['djradio', '电台', '导入电台'])
 @log(command='radio')
+@bot.command(name='radio', aliases=['djradio', '电台', '导入电台'])
 @ban
 @warn
 async def import_music_by_radio(msg: Message, radio_url: str = ''):
@@ -291,8 +287,8 @@ async def import_music_by_radio(msg: Message, radio_url: str = ''):
     await msg.channel.send('导入成功，输入 /list 查看播放列表')
 
 
-@bot.command(name="bilibili", aliases=["bili", "bzhan", "bv", "bvid", "b站", "哔哩哔哩", "叔叔"])
 @log(command="bilibili")
+@bot.command(name="bilibili", aliases=["bili", "bzhan", "bv", "bvid", "b站", "哔哩哔哩", "叔叔"])
 @ban
 @warn
 async def play_audio_from_bilibili_video(msg: Message, bilibili_url: str = ""):
@@ -316,8 +312,8 @@ async def play_audio_from_bilibili_video(msg: Message, bilibili_url: str = ""):
             await msg.channel.send(f"没有搜索到对应的视频, 或音源无法抽提")
 
 
-@bot.command(name="search", aliases=["搜索", "搜"])
 @log(command="search")
+@bot.command(name="search", aliases=["搜索", "搜"])
 @ban
 @warn
 async def search_music(msg: Message, *args):
@@ -367,8 +363,8 @@ async def search_music(msg: Message, *args):
             await msg.reply(f"没有任何与关键词: {keyword} 匹配的信息, 试试搜索其他关键字吧")
 
 
-@bot.command(name="select", aliases=["pick", "选择", "选"])
 @log(command="select")
+@bot.command(name="select", aliases=["pick", "选择", "选"])
 @ban
 @warn
 async def select_candidate(msg: Message, candidate_num: str = ""):
@@ -393,8 +389,8 @@ async def select_candidate(msg: Message, candidate_num: str = ""):
                 await msg.channel.send(f"已将 {selected_music.name}-{selected_music.author} 添加到播放列表")
 
 
-@bot.command(name="list", aliases=["ls", "列表", "播放列表", "队列"])
 @log(command="list")
+@bot.command(name="list", aliases=["ls", "列表", "播放列表", "队列"])
 async def play_list(msg: Message):
     play_list = list(settings.playqueue)
     if not play_list:
@@ -417,8 +413,8 @@ async def play_list(msg: Message):
             raise e
 
 
-@bot.command(name="cut", aliases=["next", "切歌", "下一首", "切"])
 @log(command="cut")
+@bot.command(name="cut", aliases=["next", "切歌", "下一首", "切"])
 @ban
 @warn
 async def cut_music(msg: Message):
@@ -443,8 +439,8 @@ async def cut_music(msg: Message):
             settings.played = 5000
 
 
-@bot.command(name="remove", aliases=["rm", "删除", "删"])
 @log(command="remove")
+@bot.command(name="remove", aliases=["rm", "删除", "删"])
 @ban
 @warn
 async def remove_music_in_play_list(msg: Message, music_number: str = ""):
@@ -469,8 +465,8 @@ async def remove_music_in_play_list(msg: Message, music_number: str = ""):
                 await msg.channel.send(f"已将歌曲 {removed_music.name}-{removed_music.author} 从播放列表移除")
 
 
-@bot.command(name='clear', aliases=['清空'])
 @log(command='clear')
+@bot.command(name='clear', aliases=['清空'])
 @ban
 @warn
 async def clear_playlist(msg: Message):
@@ -488,8 +484,8 @@ async def clear_playlist(msg: Message):
         await msg.channel.send("permission denied")
 
 
-@bot.command(name="top", aliases=["置顶", "顶"])
 @log(command="top")
+@bot.command(name="top", aliases=["置顶", "顶"])
 @ban
 @warn
 async def make_music_at_top_of_play_list(msg: Message, music_number: str = ""):
@@ -515,16 +511,16 @@ async def make_music_at_top_of_play_list(msg: Message, music_number: str = ""):
             await msg.channel.send(f"已将歌曲 {to_top_music.name}-{to_top_music.author} 在播放列表中置顶")
 
 
-@bot.command(name="pause", aliases=["暂停"])
 @log(command="pause")
+@bot.command(name="pause", aliases=["暂停"])
 @ban
 @warn
 async def pause(msg: Message):
     await container_handler.pause_container()
 
 
-@bot.command(name="unpause", aliases=["取消暂停", "继续"])
 @log(command="unpause")
+@bot.command(name="unpause", aliases=["取消暂停", "继续"])
 @ban
 @warn
 async def unpause(msg: Message):
@@ -539,8 +535,8 @@ async def stop_music(msg: Message):
 """
 
 
-@bot.command(name="warn")
 @log(command="warn")
+@bot.command(name="warn")
 async def operate_warned_user_list(msg: Message, action: str = "", user_id: str = ""):
     if msg.author.id in settings.admin_users:
         if action not in ["add", "remove", "list", "rm", "ls"]:
