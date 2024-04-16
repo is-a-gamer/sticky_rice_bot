@@ -11,59 +11,6 @@ from app.voice_utils.container_async_handler import container_handler
 from app.music.bilibili.search import BPROXY_API
 
 
-async def update_played_time_and_change_music():
-    logger.debug(f"PLAYED: {settings.played}")
-    logger.debug(f"Q: {[str(music) for music in settings.playqueue]}")
-    logger.debug(f"LOCK: {settings.lock}")
-
-    if settings.lock:
-        return None
-    else:
-        settings.lock = True
-
-        try:
-            if len(settings.playqueue) == 0:
-                settings.played = 0
-                settings.lock = False
-                return None
-            else:
-                first_music = settings.playqueue[0]
-                if settings.played == 0:
-                    await container_handler.create_container(first_music.source, repeat="true")
-
-                    first_music.endtime = int(datetime.datetime.now().timestamp() * 1000) + first_music.duration
-
-                    settings.played += 5000
-                    settings.lock = False
-                    return None
-                else:
-                    duration = first_music.duration
-                    if settings.played + 5000 < duration:
-                        settings.played += 5000
-                        settings.lock = False
-                        return None
-                    else:
-                        settings.playqueue.popleft()
-                        if len(settings.playqueue) == 0:
-                            await container_handler.stop_container()
-                            settings.played = 0
-                            settings.lock = False
-                            return None
-                        else:
-                            next_music = settings.playqueue[0]
-                            await container_handler.create_container(next_music.source)
-
-                            next_music.endtime = int(datetime.datetime.now().timestamp() * 1000) + next_music.duration
-
-                            settings.played = 5000
-                            settings.lock = False
-                            return None
-        except Exception as e:
-            settings.lock = False
-            logger.error(
-                f"error occurred in automatically changing music, error msg: {e}, traceback: {traceback.format_exc()}")
-
-
 async def clear_expired_candidates_cache():
     if settings.candidates_lock:
         return None
