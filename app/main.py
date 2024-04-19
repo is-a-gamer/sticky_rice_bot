@@ -225,34 +225,36 @@ async def logout(msg: Message):
     else:
         await msg.channel.send("permission denied")
 
-
 @bot.task.add_interval(seconds=60)
 async def check_ip_change():
     global previous_ip
-    while True:
-        if current_ip:
-            if current_ip != previous_ip:
-                current_ip = get_public_ip()
-                channels = channel_bind.get_data()
-                for server_id in channels:
-                    channel_id = channels[server_id]
-                    ip_change_cheannel = await bot.client.fetch_public_channel(channel_id)
-                await ip_change_cheannel.send(f"你的IP地址已经变更为:{current_ip}, 所有服务暂停10~20分钟，请耐心等待,如果有服务超过1小时仍无法使用,联系血糯米")
-                # 执行你想要执行的命令
-                # 这里可以是调用其他函数、运行其他脚本等等
-                # 示例：os.system("your_command")
-                # 示例：subprocess.run(["your_command", "arg1", "arg2"])
-                previous_ip = current_ip
-            else:
-                print("IP地址未变更")
+    current_ip = get_public_ip()
+    if current_ip:
+        if current_ip != previous_ip:
+            channels = ip_channel_bind.get_data()
+            for server_id in channels:
+                channel_id = channels[server_id]
+                ip_change_channel = await bot.client.fetch_public_channel(channel_id)
+                await ip_change_channel.send(f"服务器的IP地址已经变更为:{current_ip}, 所有服务暂停10~20分钟，请耐心等待,如果有服务超过1小时仍无法使用,联系血糯米")
+            previous_ip = current_ip
+            print("已经变更IP地址")
         else:
-            print("Unable to retrieve public IP address.")
+            print("IP地址未变更")
+    else:
+        print("Unable to retrieve public IP address.")
+
 
 # startup events
 @bot.task.add_date()
 async def startup_tasks():
     global previous_ip
     previous_ip = get_public_ip()
+    channels = ip_channel_bind.get_data()
+    for server_id in channels:
+        channel_id = channels[server_id]
+        ip_change_channel = await bot.client.fetch_public_channel(channel_id)
+        current_ip = get_public_ip()
+        await ip_change_channel.send(f"机器人已重新上线,当前服务器IP为{current_ip}")
 
 @bot.task.add_interval(minutes=3)
 async def three_minutes_interval_tasks():
